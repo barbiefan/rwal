@@ -5,4 +5,5 @@ edition = "2021"
 
 [dependencies]
 image = { version = "0.24.7", default-features = false, features = ["jpeg", "png"] }
+imghdr = "0.7.0"
 structopt = "0.3.26"

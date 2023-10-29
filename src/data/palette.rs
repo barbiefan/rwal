@@ -1,5 +1,6 @@
 use super::color::Color;
 
+#[derive(Default)]
 pub struct Palette {
     color_1: Color,
     color_2: Color,

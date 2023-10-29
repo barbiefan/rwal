@@ -1,11 +1,13 @@
-use image;
+use imghdr;
 use rwal::backends::{simple::SimpleBackend, wal::WalBackend, Backend, Backends};
+use std::path::PathBuf;
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "fancify")]
 struct Arguments {
-    file_path: String,
+    #[structopt(parse(from_os_str))]
+    file_path: PathBuf,
 
     #[structopt(short, long, default_value = "Wal")]
     backend: Backends,
@@ -17,10 +19,27 @@ fn main() {
         Backends::Simple => Box::new(SimpleBackend {}),
         Backends::Wal => Box::new(WalBackend {}),
     };
-    let mut sl = backend.generate_palette(&arguments.file_path).into_iter();
-    let mut imgbuf = image::ImageBuffer::new(5, 2);
-    for pixel in imgbuf.pixels_mut() {
-        *pixel = image::Rgb(sl.next().unwrap_or([0, 0, 0]));
+
+    match verify_image_path(&arguments.file_path) {
+        Err(err) => {
+            println!("{err}");
+            return;
+        }
+        _ => (),
     }
-    imgbuf.save("/home/obey/palette.png").unwrap();
+
+    let pal = backend.generate_palette(&arguments.file_path);
+}
+
+fn verify_image_path(path: &PathBuf) -> Result<(), String> {
+    match imghdr::from_file(&path) {
+        Ok(opt) => match opt {
+            Some(t) => match t {
+                imghdr::Type::Jpeg | imghdr::Type::Png => Ok(()),
+                _ => Err(format!("error: Unsupported image type {:?}", t)),
+            },
+            None => Err("error: Provided file is not an image".into()),
+        },
+        Err(err) => Err(format!("error: {}", err)),
+    }
 }

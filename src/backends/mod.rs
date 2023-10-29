@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::str::FromStr;
 
 use super::data::color::Color;
@@ -7,7 +8,7 @@ pub mod simple;
 pub mod wal;
 
 pub trait Backend {
-    fn generate_palette(&self, path: &str) -> Palette;
+    fn generate_palette(&self, path: &PathBuf) -> Palette;
 }
 
 #[derive(Debug)]
@@ -22,7 +23,10 @@ impl FromStr for Backends {
         match s {
             "simple" | "Simple" => Ok(Self::Simple),
             "wal" | "Wal" => Ok(Self::Wal),
-            _ => Err(format!("Unknown backend {s}")),
+            _ => Err(format!(
+                "Unknown backend \"{s}\". Valid backends: {:?}",
+                [Backends::Simple, Backends::Wal,]
+            )),
         }
     }
 }

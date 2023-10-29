@@ -1,4 +1,4 @@
-use std::process::Command;
+use std::{path::PathBuf, process::Command};
 
 use super::{Backend, Color, Palette};
 
@@ -6,7 +6,7 @@ use super::{Backend, Color, Palette};
 pub struct WalBackend {}
 
 impl Backend for WalBackend {
-    fn generate_palette(&self, path: &str) -> Palette {
+    fn generate_palette(&self, path: &PathBuf) -> Palette {
         let magick_command = "magick";
         let mut raw_colors: Vec<Color> = Vec::new();
         for i in 0..20 {
@@ -25,9 +25,14 @@ impl Backend for WalBackend {
 }
 
 impl WalBackend {
-    fn imagemagick(color_count: i32, img: &str, magic_command: &str) -> Vec<Color> {
+    fn imagemagick(color_count: i32, img: &PathBuf, magic_command: &str) -> Vec<Color> {
+        let path = img
+            .clone()
+            .into_os_string()
+            .into_string()
+            .unwrap_or_default();
         let flags = [
-            img,
+            &path,
             "-resize",
             "25%",
             "-colors",

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf};
 
 use image::imageops::FilterType;
 use image::GenericImageView;
@@ -9,7 +9,7 @@ use super::{Backend, Color, Palette};
 pub struct SimpleBackend {}
 
 impl Backend for SimpleBackend {
-    fn generate_palette(&self, path: &str) -> Palette {
+    fn generate_palette(&self, path: &PathBuf) -> Palette {
         let file = image::open(path)
             .unwrap_or_default()
             .resize(128, 128, FilterType::Gaussian);
