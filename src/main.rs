@@ -1,6 +1,9 @@
 use imghdr;
-use rwal::backends::{simple::SimpleBackend, wal::WalBackend, Backend, Backends};
-use std::path::PathBuf;
+use rwal::{
+    backends::{simple::SimpleBackend, wal::WalBackend, Backend, Backends},
+    templating::template::process_templates,
+};
+use std::path::{Path, PathBuf};
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
@@ -14,6 +17,9 @@ struct Arguments {
 }
 
 fn main() {
+    let templates_dir = Path::new("/home/obey/.config/rwal/");
+    let cache_dir = Path::new("/home/obey/.cache/rwal/");
+
     let arguments = Arguments::from_args();
     let backend: Box<dyn Backend> = match &arguments.backend {
         Backends::Simple => Box::new(SimpleBackend {}),
@@ -29,6 +35,10 @@ fn main() {
     }
 
     let pal = backend.generate_palette(&arguments.file_path);
+    match process_templates(&pal, templates_dir, cache_dir) {
+        Ok(_) => (),
+        Err(err) => println!("{err}"),
+    }
 }
 
 fn verify_image_path(path: &PathBuf) -> Result<(), String> {

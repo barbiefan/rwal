@@ -2,14 +2,14 @@ use super::color::Color;
 
 #[derive(Default)]
 pub struct Palette {
-    color_1: Color,
-    color_2: Color,
-    color_3: Color,
-    color_4: Color,
-    color_5: Color,
-    color_6: Color,
-    color_7: Color,
-    color_8: Color,
+    pub color_1: Color,
+    pub color_2: Color,
+    pub color_3: Color,
+    pub color_4: Color,
+    pub color_5: Color,
+    pub color_6: Color,
+    pub color_7: Color,
+    pub color_8: Color,
 }
 
 impl IntoIterator for Palette {
@@ -29,14 +29,30 @@ impl FromIterator<[u8; 3]> for Palette {
     fn from_iter<T: IntoIterator<Item = [u8; 3]>>(iter: T) -> Self {
         let mut iter = iter.into_iter();
         Palette {
-            color_1: iter.next().unwrap_or([0, 0, 0]),
-            color_2: iter.next().unwrap_or([0, 0, 0]),
-            color_3: iter.next().unwrap_or([0, 0, 0]),
-            color_4: iter.next().unwrap_or([0, 0, 0]),
-            color_5: iter.next().unwrap_or([0, 0, 0]),
-            color_6: iter.next().unwrap_or([0, 0, 0]),
-            color_7: iter.next().unwrap_or([0, 0, 0]),
-            color_8: iter.next().unwrap_or([0, 0, 0]),
+            color_1: iter.next().unwrap_or([0, 0, 0]).into(),
+            color_2: iter.next().unwrap_or([0, 0, 0]).into(),
+            color_3: iter.next().unwrap_or([0, 0, 0]).into(),
+            color_4: iter.next().unwrap_or([0, 0, 0]).into(),
+            color_5: iter.next().unwrap_or([0, 0, 0]).into(),
+            color_6: iter.next().unwrap_or([0, 0, 0]).into(),
+            color_7: iter.next().unwrap_or([0, 0, 0]).into(),
+            color_8: iter.next().unwrap_or([0, 0, 0]).into(),
+        }
+    }
+}
+
+impl FromIterator<Color> for Palette {
+    fn from_iter<T: IntoIterator<Item = Color>>(iter: T) -> Self {
+        let mut iter = iter.into_iter();
+        Palette {
+            color_1: iter.next().unwrap_or(Color::default()),
+            color_2: iter.next().unwrap_or(Color::default()),
+            color_3: iter.next().unwrap_or(Color::default()),
+            color_4: iter.next().unwrap_or(Color::default()),
+            color_5: iter.next().unwrap_or(Color::default()),
+            color_6: iter.next().unwrap_or(Color::default()),
+            color_7: iter.next().unwrap_or(Color::default()),
+            color_8: iter.next().unwrap_or(Color::default()),
         }
     }
 }
@@ -69,14 +85,14 @@ impl Iterator for PaletteIntoInterator {
 impl From<Palette> for Vec<[u8; 3]> {
     fn from(value: Palette) -> Self {
         vec![
-            value.color_1,
-            value.color_2,
-            value.color_3,
-            value.color_4,
-            value.color_5,
-            value.color_6,
-            value.color_7,
-            value.color_8,
+            [value.color_1.r, value.color_1.g, value.color_1.b],
+            [value.color_2.r, value.color_2.g, value.color_2.b],
+            [value.color_3.r, value.color_3.g, value.color_3.b],
+            [value.color_4.r, value.color_4.g, value.color_4.b],
+            [value.color_5.r, value.color_5.g, value.color_5.b],
+            [value.color_6.r, value.color_6.g, value.color_6.b],
+            [value.color_7.r, value.color_7.g, value.color_7.b],
+            [value.color_8.r, value.color_8.g, value.color_8.b],
         ]
     }
 }

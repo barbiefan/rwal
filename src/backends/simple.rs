@@ -15,7 +15,7 @@ impl Backend for SimpleBackend {
             .resize(128, 128, FilterType::Gaussian);
         let mut pix_map: HashMap<Color, i32> = HashMap::default();
         file.pixels()
-            .map(|pixel| [pixel.2 .0[0], pixel.2 .0[1], pixel.2 .0[2]])
+            .map(|pixel| Color::from([pixel.2 .0[0], pixel.2 .0[1], pixel.2 .0[2]]))
             .for_each(|data| {
                 *pix_map.entry(data).or_insert(0) += 1;
             });

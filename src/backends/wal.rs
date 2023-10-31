@@ -65,5 +65,5 @@ fn from_hex(rgb_hex: &str) -> Color {
     let r = u8::from_str_radix(&rgb_hex[1..3], 16).unwrap();
     let g = u8::from_str_radix(&rgb_hex[3..5], 16).unwrap();
     let b = u8::from_str_radix(&rgb_hex[5..], 16).unwrap();
-    [r, g, b]
+    Color::from([r, g, b])
 }
