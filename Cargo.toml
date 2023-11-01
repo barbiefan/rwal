@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+clap = { version = "4.4.7", features = ["derive"] }
 image = { version = "0.24.7", default-features = false, features = ["jpeg", "png"] }
 imghdr = "0.7.0"
-structopt = "0.3.26"
