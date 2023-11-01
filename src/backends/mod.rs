@@ -17,6 +17,11 @@ pub enum Backends {
     Wal,
 }
 
+#[derive(Debug)]
+pub struct SimpleBackend;
+#[derive(Debug)]
+pub struct WalBackend;
+
 impl FromStr for Backends {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {

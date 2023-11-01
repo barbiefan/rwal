@@ -1,6 +1,5 @@
-use imghdr;
 use rwal::{
-    backends::{simple::SimpleBackend, wal::WalBackend, Backend, Backends},
+    backends::{Backend, Backends, SimpleBackend, WalBackend},
     data::palette::Palette,
     templating::template::process_templates,
 };
@@ -27,12 +26,9 @@ fn main() {
         Backends::Wal => Box::new(WalBackend {}),
     };
 
-    match verify_image_path(&arguments.file_path) {
-        Err(err) => {
-            println!("{err}");
-            return;
-        }
-        _ => (),
+    if let Err(err) = verify_image_path(&arguments.file_path) {
+        println!("{err}");
+        return;
     }
 
     let pal: Palette = backend.generate_palette(&arguments.file_path);
@@ -43,14 +39,14 @@ fn main() {
 }
 
 fn verify_image_path(path: &PathBuf) -> Result<(), String> {
-    match imghdr::from_file(&path) {
+    match imghdr::from_file(path) {
         Ok(opt) => match opt {
             Some(t) => match t {
                 imghdr::Type::Jpeg | imghdr::Type::Png => Ok(()),
-                _ => Err(format!("error: Unsupported image type {:?}", t)),
+                _ => Err(format!("error: Unsupported image type {t:?}")),
             },
             None => Err("error: Provided file is not an image".into()),
         },
-        Err(err) => Err(format!("error: {}", err)),
+        Err(err) => Err(format!("error: {err}")),
     }
 }

@@ -1,18 +1,16 @@
 use std::{path::Path, process::Command};
 
-use super::{Backend, Color, Palette};
-
-#[derive(Debug)]
-pub struct WalBackend {}
+use super::{Backend, Color, Palette, WalBackend};
 
 impl Backend for WalBackend {
     fn generate_palette(&self, path: &Path) -> Palette {
         let magick_command = "magick";
         let raw_colors = WalBackend::imagemagick(8, path, magick_command);
 
-        if raw_colors.is_empty() {
-            panic!("Imagemagick couldn't generate a suitable palette.")
-        }
+        assert!(
+            !raw_colors.is_empty(),
+            "Imagemagick couldn't generate a suitable palette."
+        );
 
         raw_colors
             .iter()
@@ -26,7 +24,7 @@ impl WalBackend {
     fn imagemagick(color_count: i32, img: &Path, magic_command: &str) -> Vec<Color> {
         let path = img.as_os_str().to_str().unwrap();
         let flags = [
-            &path,
+            path,
             "-resize",
             "25%",
             "-colors",
@@ -36,7 +34,7 @@ impl WalBackend {
         ];
 
         let output = Command::new(magic_command)
-            .args(&flags)
+            .args(flags)
             .output()
             .expect("failed to execute imagemagick");
         let colors = output.stdout;
@@ -44,7 +42,7 @@ impl WalBackend {
             .expect("Failed to parse colors")
             .lines()
             .skip(1)
-            .map(|line| find_color(line))
+            .map(find_color)
             .collect();
         colors
     }

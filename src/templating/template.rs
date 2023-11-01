@@ -2,6 +2,9 @@ use std::path::Path;
 
 use crate::data::palette::Palette;
 
+/// # Errors
+///
+/// Will Return `std::io::Error` if something with dirs or files goes wrong
 pub fn process_templates(
     palette: &Palette,
     templates_dir: &Path,
@@ -20,11 +23,11 @@ pub fn process_templates(
             Ok(entry) => {
                 if let Ok(ftype) = entry.file_type() {
                     if ftype.is_dir() {
-                        process_templates(&palette, &entry.path(), cache_dir)?;
+                        process_templates(palette, &entry.path(), cache_dir)?;
                         continue;
                     } else if ftype.is_file() {
                         let mut template = std::fs::read_to_string(&entry.path())?;
-                        template.colorize(&palette);
+                        template.colorize(palette);
                         if let Some(template_name) = &entry.path().file_name() {
                             std::fs::write(cache_dir.join(template_name), template)?;
                         }

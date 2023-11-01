@@ -16,9 +16,11 @@ impl From<[u8; 3]> for Color {
 }
 
 impl Color {
+    #[must_use]
     pub fn as_dec_rgb(&self) -> String {
         format!("{}, {}, {}", self.r, self.g, self.b)
     }
+    #[must_use]
     pub fn as_hex_code(&self) -> String {
         format!("#{:02X}{:02X}{:02X}", self.r, self.g, self.b)
     }

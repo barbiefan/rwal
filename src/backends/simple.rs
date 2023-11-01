@@ -3,10 +3,7 @@ use std::{collections::HashMap, path::Path};
 use image::imageops::FilterType;
 use image::GenericImageView;
 
-use super::{Backend, Color, Palette};
-
-#[derive(Debug)]
-pub struct SimpleBackend {}
+use super::{Backend, Color, Palette, SimpleBackend};
 
 impl Backend for SimpleBackend {
     fn generate_palette(&self, path: &Path) -> Palette {
