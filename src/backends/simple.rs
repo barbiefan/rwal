@@ -1,4 +1,4 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::HashMap, path::Path};
 
 use image::imageops::FilterType;
 use image::GenericImageView;
@@ -9,7 +9,7 @@ use super::{Backend, Color, Palette};
 pub struct SimpleBackend {}
 
 impl Backend for SimpleBackend {
-    fn generate_palette(&self, path: &PathBuf) -> Palette {
+    fn generate_palette(&self, path: &Path) -> Palette {
         let file = image::open(path)
             .unwrap_or_default()
             .resize(128, 128, FilterType::Gaussian);
@@ -22,6 +22,11 @@ impl Backend for SimpleBackend {
         let mut pix_vec: Vec<_> = pix_map.into_iter().collect();
         pix_vec.sort_by_key(|(_, count)| *count);
         pix_vec.reverse();
-        pix_vec[0..=9].iter().map(|(color, _)| *color).collect()
+        pix_vec[0..=9]
+            .iter()
+            .map(|(col, _)| col)
+            .enumerate()
+            .map(|(index, &color)| (format!("color_{}", index + 1), color))
+            .collect()
     }
 }

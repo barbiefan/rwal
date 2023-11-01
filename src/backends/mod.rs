@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::Path;
 use std::str::FromStr;
 
 use super::data::color::Color;
@@ -8,7 +8,7 @@ pub mod simple;
 pub mod wal;
 
 pub trait Backend {
-    fn generate_palette(&self, path: &PathBuf) -> Palette;
+    fn generate_palette(&self, path: &Path) -> Palette;
 }
 
 #[derive(Debug)]

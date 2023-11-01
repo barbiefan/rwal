@@ -1,6 +1,7 @@
 use imghdr;
 use rwal::{
     backends::{simple::SimpleBackend, wal::WalBackend, Backend, Backends},
+    data::palette::Palette,
     templating::template::process_templates,
 };
 use std::path::{Path, PathBuf};
@@ -34,7 +35,7 @@ fn main() {
         _ => (),
     }
 
-    let pal = backend.generate_palette(&arguments.file_path);
+    let pal: Palette = backend.generate_palette(&arguments.file_path);
     match process_templates(&pal, templates_dir, cache_dir) {
         Ok(_) => (),
         Err(err) => println!("{err}"),
