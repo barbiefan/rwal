@@ -1,4 +1,4 @@
-#[derive(Default, Eq, Hash, PartialEq, Copy, Clone)]
+#[derive(Debug, Default, Eq, Hash, PartialEq, Copy, Clone)]
 pub struct Color {
     pub r: u8,
     pub g: u8,
@@ -22,6 +22,6 @@ impl Color {
     }
     #[must_use]
     pub fn as_hex_code(&self) -> String {
-        format!("#{:02X}{:02X}{:02X}", self.r, self.g, self.b)
+        format!("{:02X}{:02X}{:02X}", self.r, self.g, self.b)
     }
 }
