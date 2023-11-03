@@ -3,6 +3,7 @@ use std::path::Path;
 use super::data::color::Color;
 use super::data::palette::Palette;
 
+pub mod median_cut;
 pub mod simple;
 pub mod wal;
 
@@ -14,9 +15,12 @@ pub trait Backend {
 pub enum Backends {
     Simple,
     Wal,
+    MedianCut,
 }
 
 #[derive(Debug)]
 pub struct SimpleBackend;
 #[derive(Debug)]
 pub struct WalBackend;
+#[derive(Debug)]
+pub struct MedianCut;

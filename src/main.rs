@@ -1,5 +1,5 @@
 use rwal::{
-    backends::{Backend, Backends, SimpleBackend, WalBackend},
+    backends::{Backend, Backends, MedianCut, SimpleBackend, WalBackend},
     data::palette::Palette,
     templating::template::process_templates,
 };
@@ -12,7 +12,7 @@ use clap::{error::ErrorKind, CommandFactory, Parser};
 struct Arguments {
     file_path: PathBuf,
 
-    #[arg(short, long, default_value = "Wal", value_enum)]
+    #[arg(short, long, default_value = "wal", value_enum)]
     backend: Backends,
 }
 
@@ -25,6 +25,7 @@ fn main() {
     let backend: Box<dyn Backend> = match &arguments.backend {
         Backends::Simple => Box::new(SimpleBackend {}),
         Backends::Wal => Box::new(WalBackend {}),
+        Backends::MedianCut => Box::new(MedianCut {}),
     };
 
     let mut cmd = Arguments::command();
