@@ -5,7 +5,7 @@ use super::{Backend, Color, Palette, WalBackend};
 impl Backend for WalBackend {
     fn generate_palette(&self, path: &Path) -> Palette {
         let magick_command = "magick";
-        let raw_colors = WalBackend::imagemagick(8, path, magick_command);
+        let raw_colors = WalBackend::imagemagick(20, path, magick_command);
 
         assert!(
             !raw_colors.is_empty(),
@@ -15,7 +15,7 @@ impl Backend for WalBackend {
         raw_colors
             .iter()
             .enumerate()
-            .map(|(index, &color)| (format!("color_{}", index + 1), color))
+            .map(|(index, &color)| (format!("color_{}", index), color))
             .collect()
     }
 }
