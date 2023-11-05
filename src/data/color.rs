@@ -1,3 +1,5 @@
+use std::hash::Hash;
+
 #[derive(Debug, Default, Eq, Hash, PartialEq, Copy, Clone)]
 pub struct Color {
     pub r: u8,
@@ -16,6 +18,9 @@ impl From<[u8; 3]> for Color {
 }
 
 impl Color {
+    pub fn brightness(&self) -> u8 {
+        (((self.r as u16) + (self.g as u16) + (self.b as u16)) / 3) as u8
+    }
     #[must_use]
     pub fn as_dec_rgb(&self) -> String {
         format!("{}, {}, {}", self.r, self.g, self.b)
