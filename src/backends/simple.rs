@@ -6,7 +6,7 @@ use image::GenericImageView;
 use super::{Backend, Color, Palette, SimpleBackend};
 
 impl Backend for SimpleBackend {
-    fn generate_palette(&self, path: &Path) -> Palette {
+    fn generate_palette(&self, path: &Path, colors: usize) -> Palette {
         let file = image::open(path)
             .unwrap_or_default()
             .resize(128, 128, FilterType::Gaussian);
@@ -19,7 +19,7 @@ impl Backend for SimpleBackend {
         let mut pix_vec: Vec<_> = pix_map.into_iter().collect();
         pix_vec.sort_by_key(|(_, count)| *count);
         pix_vec.reverse();
-        pix_vec[0..=9]
+        pix_vec[0..=colors + 1]
             .iter()
             .map(|(col, _)| col)
             .enumerate()

@@ -8,5 +8,6 @@ opt-level = 3
 
 [dependencies]
 clap = { version = "4.4.7", features = ["derive"] }
+clap-num = "1.0.2"
 image = { version = "0.24.7", default-features = false, features = ["jpeg", "png"] }
 imghdr = "0.7.0"

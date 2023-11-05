@@ -12,12 +12,15 @@ use clap::{error::ErrorKind, CommandFactory, Parser};
 struct Arguments {
     file_path: PathBuf,
 
-    #[arg(short, long, default_value = "wal", value_enum)]
+    #[arg(short, long, default_value = "median-cut", value_enum)]
     backend: Backends,
+
+    #[arg(short, long, default_value = "16", value_parser=validate_colors_number)]
+    colors: usize,
 }
 
 fn main() {
-    let templates_dir = Path::new("/home/obey/.config/rwal/");
+    let templates_dir = Path::new("/home/obey/.config/rwal/templates");
     let cache_dir = Path::new("/home/obey/.cache/rwal/");
 
     let arguments = Arguments::parse();
@@ -64,11 +67,15 @@ fn main() {
         }
     };
 
-    let pal: Palette = backend.generate_palette(&arguments.file_path);
+    let pal: Palette = backend.generate_palette(&arguments.file_path, arguments.colors);
     match process_templates(&pal, templates_dir, cache_dir) {
         Ok(_) => (),
         Err(err) => {
             cmd.error(ErrorKind::Io, format!("{err}")).exit();
         }
     }
+}
+
+fn validate_colors_number(s: &str) -> Result<usize, String> {
+    clap_num::number_range(s, 0, 16)
 }

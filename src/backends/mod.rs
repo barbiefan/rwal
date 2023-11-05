@@ -8,7 +8,7 @@ pub mod simple;
 pub mod wal;
 
 pub trait Backend {
-    fn generate_palette(&self, path: &Path) -> Palette;
+    fn generate_palette(&self, path: &Path, colors: usize) -> Palette;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, clap::ValueEnum)]

@@ -3,9 +3,9 @@ use std::{path::Path, process::Command};
 use super::{Backend, Color, Palette, WalBackend};
 
 impl Backend for WalBackend {
-    fn generate_palette(&self, path: &Path) -> Palette {
+    fn generate_palette(&self, path: &Path, colors: usize) -> Palette {
         let magick_command = "magick";
-        let raw_colors = WalBackend::imagemagick(20, path, magick_command);
+        let raw_colors = WalBackend::imagemagick(16 + colors as i32, path, magick_command);
 
         assert!(
             !raw_colors.is_empty(),
