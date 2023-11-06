@@ -4,11 +4,12 @@ impl Pattern for BgFgRestPattern {
     /// Puts darkest color in 1st place, then brightest color in 2nd, then puts the rest not
     /// changing its order
     /// current implementation is ass.
-    fn shape<'a, 'b>(&'a self, colors: &'b mut [Color]) -> &'b [Color] {
+    fn shape<'b>(&self, colors: &'b mut [Color]) -> &'b [Color] {
         let length = colors.len();
-        if length < 2 {
-            panic!("can't apply BgFgRest pattern because there's less than 2 colors")
-        };
+        assert!(
+            length < 2,
+            "can't apply BgFgRest pattern because there's less than 2 colors"
+        );
         let mut temp: Vec<_> = colors
             .iter()
             .enumerate()

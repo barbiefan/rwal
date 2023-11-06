@@ -16,7 +16,8 @@ pub enum Patterns {
     BgFgRest,
     GrayScaleFirst,
 }
-
+#[allow(clippy::module_name_repetitions)]
+#[must_use]
 pub fn get_patterns(patterns: &Vec<Patterns>) -> Vec<Box<dyn Pattern>> {
     let mut out: Vec<Box<dyn Pattern>> = vec![];
     for pattern in patterns {

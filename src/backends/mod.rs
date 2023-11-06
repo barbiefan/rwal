@@ -18,6 +18,7 @@ pub enum Backends {
     MedianCut,
 }
 
+#[must_use]
 pub fn get_backend(back: &Backends) -> Box<dyn Backend> {
     match back {
         Backends::Simple => Box::new(SimpleBackend {}),
