@@ -9,7 +9,7 @@ impl Backend for MedianCut {
     fn generate_palette(&self, path: &Path, colors: usize) -> Palette {
         let image = image::open(path).expect("expected valid png or jpeg image");
         let (width, heigth) = image.dimensions();
-        let pixels = image
+        let pixels: Vec<_> = image
             // resizing here serves two purposes:
             // 1 - reducing size (duh) so that algorithm has to do less work.
             // 2 - blurring an image to reduce color noise so that random noisy dots don't evlove
@@ -18,7 +18,7 @@ impl Backend for MedianCut {
             .pixels()
             .map(|pixel| Color::from([pixel.2 .0[0], pixel.2 .0[1], pixel.2 .0[2]]))
             .collect();
-        Self::process(pixels, colors)
+        Self::process(&pixels, colors)
     }
 }
 
@@ -28,10 +28,10 @@ impl MedianCut {
         #[allow(clippy::cast_precision_loss)]
         let initial_pix_length = pixels.len() as f64;
         let mut hashcolors: HashSet<Color> = HashSet::with_capacity(colors);
-        let r = find_bucket_ranges(&pixels);
+        let r = find_bucket_ranges(pixels);
 
         let mut entries: Vec<(Vec<Color>, (Channel, f64), Color)> =
-            vec![(pixels.to_owned(), (r.0 .0, 1.0), find_avg_color(&pixels))];
+            vec![(pixels.to_owned(), (r.0 .0, 1.0), find_avg_color(pixels))];
 
         while hashcolors.len() < colors {
             let (index, to_div) = entries
@@ -110,8 +110,8 @@ impl MedianCut {
         hashcolors
     }
 
-    fn process(pixels: Vec<Color>, colors: usize) -> Palette {
-        let new_buckets = Self::process_buckets(&pixels, colors);
+    fn process(pixels: &[Color], colors: usize) -> Palette {
+        let new_buckets = Self::process_buckets(pixels, colors);
         let mut colors: Vec<_> = new_buckets.iter().collect();
         colors.sort_by_key(|c| c.brightness());
         colors
@@ -175,7 +175,7 @@ fn find_bucket_ranges(pixels: &[Color]) -> ((Channel, u8, [u8; 2]), u8) {
     let sigma = (u32::from(ranges[0].1) + u32::from(ranges[1].1) + u32::from(ranges[2].1)) / 3;
     (
         rmax,
-        u8::try_from(sigma).expect(&format!("can't cast sigma {sigma:?} to u8")),
+        u8::try_from(sigma).unwrap_or_else(|_| panic!("can't cast sigma {sigma:?} to u8")),
     )
 }
 

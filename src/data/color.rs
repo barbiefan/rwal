@@ -18,7 +18,7 @@ impl From<[u8; 3]> for Color {
 }
 
 impl Color {
-    #[allow(clippy::cast_possible_truncation)]
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
     #[must_use]
     pub fn brightness(&self) -> u8 {
         (0.299 * (f64::from(self.r).powi(2))
