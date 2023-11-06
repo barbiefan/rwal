@@ -43,12 +43,11 @@ impl MedianCut {
             // cloning is ok here i guess, since pre-resizeing an image takes almost all of the
             // time. checked with flamegraph
             let (new_bucket_1, new_bucket_2) = divide_on_median(&mut to_div.0.clone(), to_div.1 .0);
-            // length 1
             #[allow(clippy::cast_precision_loss)]
             let length_1 = new_bucket_1.len() as f64;
-            // length 2
             #[allow(clippy::cast_precision_loss)]
             let length_2 = new_bucket_2.len() as f64;
+
             let ((channel_1, range_1, range_arr_1), sigma_1) = find_bucket_ranges(&new_bucket_1);
             let ((channel_2, range_2, range_arr_2), sigma_2) = find_bucket_ranges(&new_bucket_2);
             let (range_arr_1, range_1, sigma_1, range_arr_2, range_2, sigma_2) = (
@@ -60,8 +59,6 @@ impl MedianCut {
                 f64::from(sigma_2),
             );
 
-            let color_1 = find_avg_color(&new_bucket_1);
-            let color_2 = find_avg_color(&new_bucket_2);
             // tldr for distance:
             // Suppose Red is widest channel.
             // If avg of Red in this bucket is 150, and
@@ -70,6 +67,8 @@ impl MedianCut {
             // 150 and small red channel values are a fluke.
             // otherwise the distance would be small (like avg is 140 and midrange is 135), and
             // we would want to divide this bucket.
+            let color_1 = find_avg_color(&new_bucket_1);
+            let color_2 = find_avg_color(&new_bucket_2);
             // distance 1
             let dom_color_1 = match channel_1 {
                 Channel::Red => f64::from(color_1.r),
