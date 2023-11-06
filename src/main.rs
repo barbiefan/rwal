@@ -98,7 +98,7 @@ fn main() {
 
             imageops::overlay(&mut orig, &mut pimg, 0, -1);
             orig.save(format!(
-                "/home/obey/Documents/git/rwal/src/tests/with_sigma_with_new_color/{}",
+                "/home/obey/Documents/git/rwal/src/tests/{}",
                 arguments.file_path.file_name().unwrap().to_string_lossy()
             ))
             .expect("can't save image");
