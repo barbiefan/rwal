@@ -34,4 +34,13 @@ impl Color {
     pub fn as_hex_code(&self) -> String {
         format!("{:02X}{:02X}{:02X}", self.r, self.g, self.b)
     }
+    pub fn gray_scale_coeff(&self) -> f64 {
+        let r = f64::from(self.r);
+        let g = f64::from(self.g);
+        let b = f64::from(self.b);
+        let rg = r - g;
+        let rb = r - b;
+        let bg = b - g;
+        (rg * rg + rb * rb + bg * bg).powf(0.5) / 3.0
+    }
 }

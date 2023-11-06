@@ -4,7 +4,8 @@ use image::{
 };
 use rwal::{
     backends::{get_backend, Backends},
-    patterns::{get_pattern, Patterns},
+    data::palette::into_palette,
+    patterns::{get_patterns, Patterns},
     templating::template::process_templates,
 };
 use std::path::{Path, PathBuf};
@@ -19,8 +20,8 @@ struct Arguments {
     #[arg(short, long, default_value = "median-cut", value_enum)]
     backend: Backends,
 
-    #[arg(short, long, default_value = "brightness", value_enum)]
-    pattern: Patterns,
+    #[arg(short, long, default_value = "brightness", value_delimiter = ',')]
+    patterns: Vec<Patterns>,
 
     #[arg(short, long, default_value = "16", value_parser=validate_colors_number)]
     colors: usize,
@@ -36,7 +37,7 @@ fn main() {
     let arguments = Arguments::parse();
 
     let backend = get_backend(&arguments.backend);
-    let pattern = get_pattern(&arguments.pattern);
+    let patterns = get_patterns(&arguments.patterns);
 
     let mut cmd = Arguments::command();
     match imghdr::from_file(&arguments.file_path) {
@@ -75,7 +76,11 @@ fn main() {
     };
 
     let colors = backend.generate_colors(&arguments.file_path, arguments.colors);
-    let pal = pattern.shape(&colors);
+    let mut colors = colors.into_iter().collect::<Vec<_>>();
+    for pattern in patterns {
+        colors = pattern.shape(&mut colors).to_vec();
+    }
+    let pal = into_palette(&colors);
 
     if arguments.test {
         let mut orig = image::open(&arguments.file_path).expect("expected valid png or jpeg image");
@@ -110,5 +115,5 @@ fn main() {
 }
 
 fn validate_colors_number(s: &str) -> Result<usize, String> {
-    clap_num::number_range(s, 0, 256)
+    clap_num::number_range(s, 1, 256)
 }
