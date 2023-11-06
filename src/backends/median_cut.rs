@@ -23,14 +23,15 @@ impl Backend for MedianCut {
 }
 
 impl MedianCut {
-    fn process_buckets<'a>(pixels: Vec<Color>, colors: usize) -> HashSet<Color> {
+    fn process_buckets(pixels: &[Color], colors: usize) -> HashSet<Color> {
         const SQ255: f64 = (255 * 255) as f64;
+        #[allow(clippy::cast_precision_loss)]
         let initial_pix_length = pixels.len() as f64;
         let mut hashcolors: HashSet<Color> = HashSet::with_capacity(colors);
         let r = find_bucket_ranges(&pixels);
 
         let mut entries: Vec<(Vec<Color>, (Channel, f64), Color)> =
-            vec![(pixels.clone(), (r.0 .0, 1.0), find_avg_color(&pixels))];
+            vec![(pixels.to_owned(), (r.0 .0, 1.0), find_avg_color(&pixels))];
 
         while hashcolors.len() < colors {
             let (index, to_div) = entries
@@ -43,8 +44,10 @@ impl MedianCut {
             // time. checked with flamegraph
             let (new_bucket_1, new_bucket_2) = divide_on_median(&mut to_div.0.clone(), to_div.1 .0);
             // length 1
+            #[allow(clippy::cast_precision_loss)]
             let length_1 = new_bucket_1.len() as f64;
             // length 2
+            #[allow(clippy::cast_precision_loss)]
             let length_2 = new_bucket_2.len() as f64;
             let ((channel_1, range_1, range_arr_1), sigma_1) = find_bucket_ranges(&new_bucket_1);
             let ((channel_2, range_2, range_arr_2), sigma_2) = find_bucket_ranges(&new_bucket_2);
@@ -108,7 +111,7 @@ impl MedianCut {
     }
 
     fn process(pixels: Vec<Color>, colors: usize) -> Palette {
-        let new_buckets = Self::process_buckets(pixels, colors);
+        let new_buckets = Self::process_buckets(&pixels, colors);
         let mut colors: Vec<_> = new_buckets.iter().collect();
         colors.sort_by_key(|c| c.brightness());
         colors
@@ -143,7 +146,10 @@ fn find_avg_color(pixels: &[Color]) -> Color {
 
 fn find_bucket_ranges(pixels: &[Color]) -> ((Channel, u8, [u8; 2]), u8) {
     // simd? I'm not skilled enough
-    assert!(!pixels.is_empty(), "find_bucket_ranges received an empty slice");
+    assert!(
+        !pixels.is_empty(),
+        "find_bucket_ranges received an empty slice"
+    );
     let [range_r, range_g, range_b] = pixels.iter().fold(
         [[u8::MAX, u8::MIN], [u8::MAX, u8::MIN], [u8::MAX, u8::MIN]],
         |mut prev, curr| {
@@ -167,7 +173,10 @@ fn find_bucket_ranges(pixels: &[Color]) -> ((Channel, u8, [u8; 2]), u8) {
     ranges.sort_by_key(|r| 255 - r.1);
     let rmax = ranges[0];
     let sigma = (u32::from(ranges[0].1) + u32::from(ranges[1].1) + u32::from(ranges[2].1)) / 3;
-    (rmax, sigma as u8)
+    (
+        rmax,
+        u8::try_from(sigma).expect(&format!("can't cast sigma {sigma:?} to u8")),
+    )
 }
 
 fn divide_on_median(pixels: &mut [Color], channel: Channel) -> (Vec<Color>, Vec<Color>) {

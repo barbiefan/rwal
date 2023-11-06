@@ -5,7 +5,11 @@ use super::{Backend, Color, Palette, WalBackend};
 impl Backend for WalBackend {
     fn generate_palette(&self, path: &Path, colors: usize) -> Palette {
         let magick_command = "magick";
-        let raw_colors = WalBackend::imagemagick(16 + colors as i32, path, magick_command);
+        let raw_colors = WalBackend::imagemagick(
+            16 + i32::try_from(colors).expect("colors number bigger than u32 range"),
+            path,
+            magick_command,
+        );
 
         assert!(
             !raw_colors.is_empty(),

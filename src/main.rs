@@ -75,33 +75,34 @@ fn main() {
     };
 
     let pal: Palette = backend.generate_palette(&arguments.file_path, arguments.colors);
-    match arguments.test {
-        false => match process_templates(&pal, templates_dir, cache_dir) {
+    if arguments.test {
+        let mut orig = image::open(&arguments.file_path).expect("expected valid png or jpeg image");
+        let (o_width, o_heigth) = orig.dimensions();
+        let width = o_width / 10;
+
+        let mut pimg: RgbaImage = ImageBuffer::new(
+            1,
+            u32::try_from(arguments.colors).expect("colors number bigger than u32 range"),
+        );
+        for (index, pix) in pimg.pixels_mut().enumerate() {
+            let pp = pal[&format!("color_{index}")];
+            *pix = Rgba::from([pp.r, pp.g, pp.b, 255]);
+        }
+        let mut pimg: DynamicImage = pimg.into();
+        pimg = pimg.resize_exact(width, o_heigth, Nearest);
+
+        imageops::overlay(&mut orig, &pimg, 0, -1);
+        orig.save(format!(
+            "/home/obey/Documents/git/rwal/src/tests/{}",
+            arguments.file_path.file_name().unwrap().to_string_lossy()
+        ))
+        .expect("can't save image");
+    } else {
+        match process_templates(&pal, templates_dir, cache_dir) {
             Ok(_) => (),
             Err(err) => {
                 cmd.error(ErrorKind::Io, format!("{err}")).exit();
             }
-        },
-        true => {
-            let mut orig =
-                image::open(&arguments.file_path).expect("expected valid png or jpeg image");
-            let (o_width, o_heigth) = orig.dimensions();
-            let width = o_width / 10;
-
-            let mut pimg: RgbaImage = ImageBuffer::new(1, arguments.colors as u32);
-            for (index, pix) in pimg.pixels_mut().enumerate() {
-                let pp = pal[&format!("color_{index}")];
-                *pix = Rgba::from([pp.r, pp.g, pp.b, 255]);
-            }
-            let mut pimg: DynamicImage = pimg.into();
-            pimg = pimg.resize_exact(width, o_heigth, Nearest);
-
-            imageops::overlay(&mut orig, &mut pimg, 0, -1);
-            orig.save(format!(
-                "/home/obey/Documents/git/rwal/src/tests/{}",
-                arguments.file_path.file_name().unwrap().to_string_lossy()
-            ))
-            .expect("can't save image");
         }
     }
 }
