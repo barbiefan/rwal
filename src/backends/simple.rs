@@ -1,12 +1,15 @@
-use std::{collections::HashMap, path::Path};
+use std::{
+    collections::{HashMap, HashSet},
+    path::Path,
+};
 
 use image::imageops::FilterType;
 use image::GenericImageView;
 
-use super::{Backend, Color, Palette, SimpleBackend};
+use super::{Backend, Color, SimpleBackend};
 
 impl Backend for SimpleBackend {
-    fn generate_palette(&self, path: &Path, colors: usize) -> Palette {
+    fn generate_colors(&self, path: &Path, colors: usize) -> HashSet<Color> {
         let file = image::open(path)
             .unwrap_or_default()
             .resize(128, 128, FilterType::Gaussian);
@@ -21,9 +24,7 @@ impl Backend for SimpleBackend {
         pix_vec.reverse();
         pix_vec[0..=colors + 1]
             .iter()
-            .map(|(col, _)| col)
-            .enumerate()
-            .map(|(index, &color)| (format!("color_{}", index + 1), color))
+            .map(|(col, _)| *col)
             .collect()
     }
 }

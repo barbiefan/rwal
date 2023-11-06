@@ -1,31 +1,20 @@
-use std::{path::Path, process::Command};
+use std::{collections::HashSet, path::Path, process::Command};
 
-use super::{Backend, Color, Palette, WalBackend};
+use super::{Backend, Color, WalBackend};
 
 impl Backend for WalBackend {
-    fn generate_palette(&self, path: &Path, colors: usize) -> Palette {
+    fn generate_colors(&self, path: &Path, colors: usize) -> HashSet<Color> {
         let magick_command = "magick";
-        let raw_colors = WalBackend::imagemagick(
+        WalBackend::imagemagick(
             16 + i32::try_from(colors).expect("colors number bigger than u32 range"),
             path,
             magick_command,
-        );
-
-        assert!(
-            !raw_colors.is_empty(),
-            "Imagemagick couldn't generate a suitable palette."
-        );
-
-        raw_colors
-            .iter()
-            .enumerate()
-            .map(|(index, &color)| (format!("color_{}", index), color))
-            .collect()
+        )
     }
 }
 
 impl WalBackend {
-    fn imagemagick(color_count: i32, img: &Path, magic_command: &str) -> Vec<Color> {
+    fn imagemagick(color_count: i32, img: &Path, magic_command: &str) -> HashSet<Color> {
         let path = img.as_os_str().to_str().unwrap();
         let flags = [
             path,
@@ -42,13 +31,12 @@ impl WalBackend {
             .output()
             .expect("failed to execute imagemagick");
         let colors = output.stdout;
-        let colors: Vec<Color> = String::from_utf8(colors)
+        String::from_utf8(colors)
             .expect("Failed to parse colors")
             .lines()
             .skip(1)
             .map(find_color)
-            .collect();
-        colors
+            .collect()
     }
 }
 

@@ -4,7 +4,7 @@ use image::{
 };
 use rwal::{
     backends::{Backend, Backends, MedianCut, SimpleBackend, WalBackend},
-    data::palette::Palette,
+    patterns::{BrightnessPattern, Pattern, Patterns},
     templating::template::process_templates,
 };
 use std::path::{Path, PathBuf};
@@ -18,6 +18,9 @@ struct Arguments {
 
     #[arg(short, long, default_value = "median-cut", value_enum)]
     backend: Backends,
+
+    #[arg(short, long, default_value = "brightness", value_enum)]
+    pattern: Patterns,
 
     #[arg(short, long, default_value = "16", value_parser=validate_colors_number)]
     colors: usize,
@@ -36,6 +39,10 @@ fn main() {
         Backends::Simple => Box::new(SimpleBackend {}),
         Backends::Wal => Box::new(WalBackend {}),
         Backends::MedianCut => Box::new(MedianCut {}),
+    };
+
+    let pattern: Box<dyn Pattern> = match &arguments.pattern {
+        Patterns::Brightness => Box::new(BrightnessPattern {}),
     };
 
     let mut cmd = Arguments::command();
@@ -74,7 +81,9 @@ fn main() {
         }
     };
 
-    let pal: Palette = backend.generate_palette(&arguments.file_path, arguments.colors);
+    let colors = backend.generate_colors(&arguments.file_path, arguments.colors);
+    let pal = pattern.shape(&colors);
+
     if arguments.test {
         let mut orig = image::open(&arguments.file_path).expect("expected valid png or jpeg image");
         let (o_width, o_heigth) = orig.dimensions();

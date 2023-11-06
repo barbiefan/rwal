@@ -1,14 +1,14 @@
+use std::collections::HashSet;
 use std::path::Path;
 
 use super::data::color::Color;
-use super::data::palette::Palette;
 
 pub mod median_cut;
 pub mod simple;
 pub mod wal;
 
 pub trait Backend {
-    fn generate_palette(&self, path: &Path, colors: usize) -> Palette;
+    fn generate_colors(&self, path: &Path, colors: usize) -> HashSet<Color>;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, clap::ValueEnum)]

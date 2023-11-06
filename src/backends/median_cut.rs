@@ -2,11 +2,11 @@ use std::{collections::HashSet, path::Path};
 
 use image::GenericImageView;
 
-use super::{Backend, Color, MedianCut, Palette};
+use super::{Backend, Color, MedianCut};
 
 /// Slightly modified Median-cut algorithm
 impl Backend for MedianCut {
-    fn generate_palette(&self, path: &Path, colors: usize) -> Palette {
+    fn generate_colors(&self, path: &Path, colors: usize) -> HashSet<Color> {
         let image = image::open(path).expect("expected valid png or jpeg image");
         let (width, heigth) = image.dimensions();
         let pixels: Vec<_> = image
@@ -23,7 +23,7 @@ impl Backend for MedianCut {
 }
 
 impl MedianCut {
-    fn process_buckets(pixels: &[Color], colors: usize) -> HashSet<Color> {
+    fn process(pixels: &[Color], colors: usize) -> HashSet<Color> {
         const SQ255: f64 = (255 * 255) as f64;
         #[allow(clippy::cast_precision_loss)]
         let initial_pix_length = pixels.len() as f64;
@@ -107,17 +107,6 @@ impl MedianCut {
             entries.push(entry2);
         }
         hashcolors
-    }
-
-    fn process(pixels: &[Color], colors: usize) -> Palette {
-        let new_buckets = Self::process_buckets(pixels, colors);
-        let mut colors: Vec<_> = new_buckets.iter().collect();
-        colors.sort_by_key(|c| c.brightness());
-        colors
-            .iter()
-            .enumerate()
-            .map(|(index, &&color)| (format!("color_{}", index), color))
-            .collect()
     }
 }
 
