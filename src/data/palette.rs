@@ -4,6 +4,7 @@ use super::color::Color;
 
 pub type Palette = HashMap<String, Color>;
 
+#[allow(clippy::module_name_repetitions)]
 pub fn into_palette(colors: &[Color]) -> Palette {
     colors
         .iter()

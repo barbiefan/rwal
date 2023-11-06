@@ -8,7 +8,7 @@ use rwal::{
     patterns::{get_patterns, Patterns},
     templating::template::process_templates,
 };
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use clap::{error::ErrorKind, CommandFactory, Parser};
 
@@ -28,52 +28,51 @@ struct Arguments {
 
     #[arg(short, long, default_value = "false")]
     test: bool,
+
+    #[arg(short, long, default_value = None)]
+    templates_dir: Option<String>,
+    #[arg(short, long, default_value = None)]
+    cache_dir: Option<String>,
 }
 
+/// main is a mess rn
 fn main() {
-    let templates_dir = Path::new("/home/obey/.config/rwal/templates");
-    let cache_dir = Path::new("/home/obey/.cache/rwal/");
-
     let arguments = Arguments::parse();
 
     let backend = get_backend(&arguments.backend);
     let patterns = get_patterns(&arguments.patterns);
 
     let mut cmd = Arguments::command();
-    match imghdr::from_file(&arguments.file_path) {
-        Ok(opt) => match opt {
-            Some(t) => match t {
-                imghdr::Type::Jpeg | imghdr::Type::Png => (),
-                _ => {
-                    cmd.error(
-                        ErrorKind::ValueValidation,
-                        format!(
-                            "{}: Unsupported image type <{t:?}>",
-                            arguments.file_path.to_string_lossy()
-                        ),
-                    )
-                    .exit();
-                }
-            },
-            None => {
-                cmd.error(
-                    ErrorKind::ValueValidation,
-                    format!(
-                        "{}: Provided file is not an image.",
-                        arguments.file_path.to_string_lossy()
-                    ),
-                )
-                .exit();
-            }
-        },
-        Err(err) => {
-            cmd.error(
-                ErrorKind::ValueValidation,
-                format!("{}: {err}", arguments.file_path.to_string_lossy()),
-            )
-            .exit();
-        }
-    };
+
+    let mut templates_dir: PathBuf;
+    let mut cache_dir: PathBuf;
+
+    // idk how to do this gracefuly
+    if arguments.templates_dir.is_none() || arguments.cache_dir.is_none() {
+        let home_env = match std::env::var("HOME") {
+            Err(err) => cmd.error(ErrorKind::Io, format!("{err}")).exit(),
+            Ok(p) => p,
+        };
+        let home_path = PathBuf::from(&home_env);
+        templates_dir = home_path.clone();
+        cache_dir = home_path.clone();
+        templates_dir.push("/.config/rwal/templates");
+        cache_dir.push("/.cache/rwal/");
+        if let Some(d) = &arguments.templates_dir {
+            templates_dir = PathBuf::from(d);
+        };
+        if let Some(d) = &arguments.cache_dir {
+            cache_dir = PathBuf::from(d);
+        };
+    } else {
+        templates_dir = PathBuf::from(arguments.templates_dir.clone().expect("hmm..."));
+        cache_dir = PathBuf::from(arguments.cache_dir.clone().expect("hmm..."));
+    }
+
+    let templates_dir = templates_dir.as_path();
+    let cache_dir = cache_dir.as_path();
+
+    check_image_file(&arguments, &mut cmd);
 
     let colors = backend.generate_colors(&arguments.file_path, arguments.colors);
     let mut colors = colors.into_iter().collect::<Vec<_>>();
@@ -112,6 +111,43 @@ fn main() {
             }
         }
     }
+}
+
+fn check_image_file(arguments: &Arguments, cmd: &mut clap::Command) {
+    match imghdr::from_file(&arguments.file_path) {
+        Ok(opt) => match opt {
+            Some(t) => match t {
+                imghdr::Type::Jpeg | imghdr::Type::Png => (),
+                _ => {
+                    cmd.error(
+                        ErrorKind::ValueValidation,
+                        format!(
+                            "{}: Unsupported image type <{t:?}>",
+                            arguments.file_path.to_string_lossy()
+                        ),
+                    )
+                    .exit();
+                }
+            },
+            None => {
+                cmd.error(
+                    ErrorKind::ValueValidation,
+                    format!(
+                        "{}: Provided file is not an image.",
+                        arguments.file_path.to_string_lossy()
+                    ),
+                )
+                .exit();
+            }
+        },
+        Err(err) => {
+            cmd.error(
+                ErrorKind::ValueValidation,
+                format!("{}: {err}", arguments.file_path.to_string_lossy()),
+            )
+            .exit();
+        }
+    };
 }
 
 fn validate_colors_number(s: &str) -> Result<usize, String> {

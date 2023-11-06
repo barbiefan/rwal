@@ -6,7 +6,7 @@ pub mod grayscalefirst;
 pub mod random;
 
 pub trait Pattern {
-    fn shape<'a, 'b>(&'a self, colors: &'b mut [Color]) -> &'b [Color];
+    fn shape<'b>(&self, colors: &'b mut [Color]) -> &'b [Color];
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, clap::ValueEnum)]
