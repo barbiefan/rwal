@@ -93,7 +93,7 @@ fn main() {
 
         imageops::overlay(&mut orig, &pimg, 0, -1);
         orig.save(format!(
-            "/home/obey/Documents/git/rwal/src/tests/{}",
+            "/home/obey/Documents/git/rwal/test/{}",
             arguments.file_path.file_name().unwrap().to_string_lossy()
         ))
         .expect("can't save image");
