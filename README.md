@@ -39,31 +39,31 @@ I'm learning rust, so any criticism/PRs are welcome.
 ## Examples:
 
 ![](./res/logo_nasa_japanese.png)
-:---------------:|:--------------------------------------------:
-wal (imagemagick)| ![](./res/wal_logo_nasa_japanese.png)
-:---------------:|:--------------------------------------------:
-median-cut | ![](./res/mediancut_logo_nasa_japanese.png)
+wal (imagemagick)
+![](./res/wal_logo_nasa_japanese.png)
+median-cut
+![](./res/mediancut_logo_nasa_japanese.png)
 
 ![](./res/anime_city_futuristic.png)
-:---------------:|:--------------------------------------------:
-wal (imagemagick)| ![](./res/wal_anime_city_futuristic.png)
-:---------------:|:--------------------------------------------:
-median-cut | ![](./res/mediancut_anime_city_futuristic.png)
+wal (imagemagick)
+![](./res/wal_anime_city_futuristic.png)
+median-cut
+![](./res/mediancut_anime_city_futuristic.png)
 
 ![](./res/anime_dragon_man_light.jpg)
-:---------------:|:--------------------------------------------:
-wal (imagemagick)| ![](./res/wal_anime_dragon_man_light.jpg)
-:---------------:|:--------------------------------------------:
-median-cut | ![](./res/mediancut_anime_dragon_man_light.jpg)
+wal (imagemagick)
+![](./res/wal_anime_dragon_man_light.jpg)
+median-cut
+![](./res/mediancut_anime_dragon_man_light.jpg)
 
 ![](./res/cyber-girl-light.png)
-:---------------:|:--------------------------------------------:
-wal (imagemagick)| ![](./res/wal_cyber-girl-light.png)
-:---------------:|:--------------------------------------------:
-median-cut | ![](./res/mediancut_cyber-girl-light.png)
+wal (imagemagick)
+![](./res/wal_cyber-girl-light.png)
+median-cut
+![](./res/mediancut_cyber-girl-light.png)
 
 ![](./res/lake_sunset_landscape.png)
-:---------------:|:--------------------------------------------:
-wal (imagemagick)| ![](./res/wal_lake_sunset_landscape.png)
-:---------------:|:--------------------------------------------:
-median-cut | ![](./res/mediancut_lake_sunset_landscape.png)
+wal (imagemagick)
+![](./res/wal_lake_sunset_landscape.png)
+median-cut
+![](./res/mediancut_lake_sunset_landscape.png)
