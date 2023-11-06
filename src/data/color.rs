@@ -19,7 +19,10 @@ impl From<[u8; 3]> for Color {
 
 impl Color {
     pub fn brightness(&self) -> u8 {
-        (((self.r as u16) + (self.g as u16) + (self.b as u16)) / 3) as u8
+        (0.299 * ((self.r as f64).powi(2))
+            + 0.587 * ((self.g as f64).powi(2))
+            + 0.114 * ((self.b as f64).powi(2)))
+        .powf(0.5) as u8
     }
     #[must_use]
     pub fn as_dec_rgb(&self) -> String {
