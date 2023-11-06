@@ -3,8 +3,8 @@ use image::{
     DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage,
 };
 use rwal::{
-    backends::{Backend, Backends, MedianCut, SimpleBackend, WalBackend},
-    patterns::{BrightnessPattern, Pattern, Patterns},
+    backends::{get_backend, Backends},
+    patterns::{get_pattern, Patterns},
     templating::template::process_templates,
 };
 use std::path::{Path, PathBuf};
@@ -35,15 +35,8 @@ fn main() {
 
     let arguments = Arguments::parse();
 
-    let backend: Box<dyn Backend> = match &arguments.backend {
-        Backends::Simple => Box::new(SimpleBackend {}),
-        Backends::Wal => Box::new(WalBackend {}),
-        Backends::MedianCut => Box::new(MedianCut {}),
-    };
-
-    let pattern: Box<dyn Pattern> = match &arguments.pattern {
-        Patterns::Brightness => Box::new(BrightnessPattern {}),
-    };
+    let backend = get_backend(&arguments.backend);
+    let pattern = get_pattern(&arguments.pattern);
 
     let mut cmd = Arguments::command();
     match imghdr::from_file(&arguments.file_path) {

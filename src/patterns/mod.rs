@@ -15,5 +15,11 @@ pub enum Patterns {
     Brightness,
 }
 
+pub fn get_pattern(patt: &Patterns) -> Box<dyn Pattern> {
+    match patt {
+        Patterns::Brightness => Box::new(BrightnessPattern {}),
+    }
+}
+
 #[derive(Debug)]
 pub struct BrightnessPattern;

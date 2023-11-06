@@ -18,6 +18,14 @@ pub enum Backends {
     MedianCut,
 }
 
+pub fn get_backend(back: &Backends) -> Box<dyn Backend> {
+    match back {
+        Backends::Simple => Box::new(SimpleBackend {}),
+        Backends::Wal => Box::new(WalBackend {}),
+        Backends::MedianCut => Box::new(MedianCut {}),
+    }
+}
+
 #[derive(Debug)]
 pub struct SimpleBackend;
 #[derive(Debug)]
