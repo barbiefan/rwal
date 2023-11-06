@@ -7,14 +7,14 @@ use super::{Backend, Color, MedianCut, Palette};
 /// Slightly modified Median-cut algorithm
 impl Backend for MedianCut {
     fn generate_palette(&self, path: &Path, colors: usize) -> Palette {
-        let image = image::open(path).unwrap_or_default();
+        let image = image::open(path).expect("expected valid png or jpeg image");
         let (width, heigth) = image.dimensions();
         let pixels = image
-            .resize_exact(
-                width / 10,
-                heigth / 10,
-                image::imageops::FilterType::Triangle,
-            )
+            // resizing here serves two purposes:
+            // 1 - reducing size (duh) so that algorithm has to do less work.
+            // 2 - blurring an image to reduce color noise so that random noisy dots don't evlove
+            //   into their own bucket.
+            .resize_exact(width / 2, heigth / 2, image::imageops::FilterType::Triangle)
             .pixels()
             .map(|pixel| Color::from([pixel.2 .0[0], pixel.2 .0[1], pixel.2 .0[2]]))
             .collect();
@@ -24,29 +24,82 @@ impl Backend for MedianCut {
 
 impl MedianCut {
     fn process_buckets<'a>(pixels: Vec<Color>, colors: usize) -> HashSet<Color> {
-        let mut hashcolors: HashSet<Color> = HashSet::new();
-        let mut entries: Vec<(Vec<Color>, usize, Color)> = vec![(
-            pixels.clone(),
-            pixels.len() * (find_bucket_ranges(&pixels).1 as usize + 1),
-            find_avg_color(&pixels),
-        )];
+        const SQ255: f64 = (255 * 255) as f64;
+        let initial_pix_length = pixels.len() as f64;
+        let mut hashcolors: HashSet<Color> = HashSet::with_capacity(colors);
+        let r = find_bucket_ranges(&pixels);
+
+        let mut entries: Vec<(Vec<Color>, (Channel, f64), Color)> =
+            vec![(pixels.clone(), (r.0 .0, 1.0), find_avg_color(&pixels))];
+
         while hashcolors.len() < colors {
-            let (index, to_div) = entries.iter().enumerate().max_by_key(|(_, e)| e.1).unwrap();
+            let (index, to_div) = entries
+                .iter()
+                .enumerate()
+                .max_by(|a, b| a.1 .1 .1.total_cmp(&b.1 .1 .1))
+                .unwrap();
 
             // cloning is ok here i guess, since pre-resizeing an image takes almost all of the
             // time. checked with flamegraph
-            let (b1, b2) = divide_on_median(&mut to_div.0.clone());
-            let l1 = b1.len();
-            let l2 = b2.len();
-            let r1 = find_bucket_ranges(&b1).1 as usize + 1;
-            let r2 = find_bucket_ranges(&b2).1 as usize + 1;
-            let c1 = find_avg_color(&b1);
-            let c2 = find_avg_color(&b2);
-            let entry1 = (b1, l1 * r1, c1);
-            let entry2 = (b2, l2 * r2, c2);
+            let (new_bucket_1, new_bucket_2) = divide_on_median(&mut to_div.0.clone(), to_div.1 .0);
+            // length 1
+            let length_1 = new_bucket_1.len() as f64;
+            // length 2
+            let length_2 = new_bucket_2.len() as f64;
+            let ((channel_1, range_1, range_arr_1), sigma_1) = find_bucket_ranges(&new_bucket_1);
+            let ((channel_2, range_2, range_arr_2), sigma_2) = find_bucket_ranges(&new_bucket_2);
+            let (range_arr_1, range_1, sigma_1, range_arr_2, range_2, sigma_2) = (
+                [range_arr_1[0] as f64, range_arr_1[1] as f64],
+                range_1 as f64,
+                sigma_1 as f64,
+                [range_arr_2[0] as f64, range_arr_2[1] as f64],
+                range_2 as f64,
+                sigma_2 as f64,
+            );
+
+            let color_1 = find_avg_color(&new_bucket_1);
+            let color_2 = find_avg_color(&new_bucket_2);
+            // tldr for distance:
+            // Suppose Red is widest channel.
+            // If avg of Red in this bucket is 150, and
+            // middle of range(Red) is 85
+            // then we can assume that this bucket contains a lot of colors with red channel near
+            // 150 and small red channel values are a fluke.
+            // otherwise the distance would be small (like avg is 140 and midrange is 135), and
+            // we would want to divide this bucket.
+            // distance 1
+            let dom_color_1 = match channel_1 {
+                Channel::Red => color_1.r as f64,
+                Channel::Green => color_1.g as f64,
+                Channel::Blue => color_1.b as f64,
+            };
+            let range_mid_1 = (range_arr_1[0] + range_arr_1[1]) / 2.0;
+            let distance_1 = range_mid_1 - dom_color_1;
+            let distance_1 = (range_mid_1 - distance_1.abs()) / range_mid_1;
+            // distance 2
+            let dom_color_2 = match channel_2 {
+                Channel::Red => color_2.r as f64,
+                Channel::Green => color_2.g as f64,
+                Channel::Blue => color_2.b as f64,
+            };
+            let range_mid_2 = (range_arr_2[0] + range_arr_2[1]) / 2.0;
+            let distance_2 = range_mid_2 - dom_color_2;
+            let distance_2 = (range_mid_2 - distance_2.abs()) / range_mid_2;
+
+            let coeff1 = (length_1 / initial_pix_length)
+                * ((range_1 * range_1) / SQ255)
+                * ((sigma_1 * sigma_1) / SQ255)
+                * (distance_1);
+            let coeff2 = (length_2 / initial_pix_length)
+                * ((range_2 * range_2) / SQ255)
+                * ((sigma_2 * sigma_2) / SQ255)
+                * (distance_2);
+
+            let entry1 = (new_bucket_1, (channel_1, coeff1), color_1);
+            let entry2 = (new_bucket_2, (channel_2, coeff2), color_2);
             hashcolors.remove(&to_div.2);
-            hashcolors.insert(c1);
-            hashcolors.insert(c2);
+            hashcolors.insert(color_1);
+            hashcolors.insert(color_2);
             entries.remove(index);
             entries.push(entry1);
             entries.push(entry2);
@@ -88,7 +141,11 @@ fn find_avg_color(pixels: &[Color]) -> Color {
         .into()
 }
 
-fn find_bucket_ranges(pixels: &[Color]) -> (Channel, u32) {
+fn find_bucket_ranges(pixels: &[Color]) -> ((Channel, u8, [u8; 2]), u8) {
+    // simd? I'm not skilled enough
+    if pixels.is_empty() {
+        panic!("find_bucket_ranges received an empty slice")
+    }
     let [range_r, range_g, range_b] = pixels.iter().fold(
         [[u8::MAX, u8::MIN], [u8::MAX, u8::MIN], [u8::MAX, u8::MIN]],
         |mut prev, curr| {
@@ -104,21 +161,20 @@ fn find_bucket_ranges(pixels: &[Color]) -> (Channel, u32) {
     let rr = range(range_r);
     let rg = range(range_g);
     let rb = range(range_b);
-    match [rr, rg, rb].iter().max() {
-        Some(&x) if x == rr => (Channel::Red, x),
-        Some(&x) if x == rg => (Channel::Green, x),
-        Some(&x) if x == rb => (Channel::Blue, x),
-        Some(&x) => {
-            panic!("can't find biggest channel. r({rr}) g({rg}) b({rb}), comapred against {x}")
-        }
-        None => panic!("can't find biggest channel. r({rr}) g({rg}) b({rb}), but max is None"),
-    }
+    let mut ranges = [
+        (Channel::Red, rr, range_r),
+        (Channel::Green, rg, range_g),
+        (Channel::Blue, rb, range_b),
+    ];
+    ranges.sort_by_key(|r| 255 - r.1);
+    let rmax = ranges[0];
+    let sigma = (ranges[0].1 as u32 + ranges[1].1 as u32 + ranges[2].1 as u32) / 3;
+    (rmax, sigma as u8)
 }
 
-fn divide_on_median(pixels: &mut [Color]) -> (Vec<Color>, Vec<Color>) {
-    let biggest_range = find_bucket_ranges(pixels).0;
+fn divide_on_median(pixels: &mut [Color], channel: Channel) -> (Vec<Color>, Vec<Color>) {
     let median = pixels.len() / 2;
-    let (b1, _, b2) = match biggest_range {
+    let (b1, _, b2) = match channel {
         Channel::Red => pixels.select_nth_unstable_by_key(median, |i| i.r),
         Channel::Green => pixels.select_nth_unstable_by_key(median, |i| i.g),
         Channel::Blue => pixels.select_nth_unstable_by_key(median, |i| i.b),
@@ -127,6 +183,6 @@ fn divide_on_median(pixels: &mut [Color]) -> (Vec<Color>, Vec<Color>) {
 }
 
 #[inline]
-fn range(r: [u8; 2]) -> u32 {
-    (r[1] - r[0]) as u32
+fn range(r: [u8; 2]) -> u8 {
+    r[1] - r[0]
 }
