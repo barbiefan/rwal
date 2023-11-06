@@ -49,12 +49,12 @@ impl MedianCut {
             let ((channel_1, range_1, range_arr_1), sigma_1) = find_bucket_ranges(&new_bucket_1);
             let ((channel_2, range_2, range_arr_2), sigma_2) = find_bucket_ranges(&new_bucket_2);
             let (range_arr_1, range_1, sigma_1, range_arr_2, range_2, sigma_2) = (
-                [range_arr_1[0] as f64, range_arr_1[1] as f64],
-                range_1 as f64,
-                sigma_1 as f64,
-                [range_arr_2[0] as f64, range_arr_2[1] as f64],
-                range_2 as f64,
-                sigma_2 as f64,
+                [f64::from(range_arr_1[0]), f64::from(range_arr_1[1])],
+                f64::from(range_1),
+                f64::from(sigma_1),
+                [f64::from(range_arr_2[0]), f64::from(range_arr_2[1])],
+                f64::from(range_2),
+                f64::from(sigma_2),
             );
 
             let color_1 = find_avg_color(&new_bucket_1);
@@ -69,18 +69,18 @@ impl MedianCut {
             // we would want to divide this bucket.
             // distance 1
             let dom_color_1 = match channel_1 {
-                Channel::Red => color_1.r as f64,
-                Channel::Green => color_1.g as f64,
-                Channel::Blue => color_1.b as f64,
+                Channel::Red => f64::from(color_1.r),
+                Channel::Green => f64::from(color_1.g),
+                Channel::Blue => f64::from(color_1.b),
             };
             let range_mid_1 = (range_arr_1[0] + range_arr_1[1]) / 2.0;
             let distance_1 = range_mid_1 - dom_color_1;
             let distance_1 = (range_mid_1 - distance_1.abs()) / range_mid_1;
             // distance 2
             let dom_color_2 = match channel_2 {
-                Channel::Red => color_2.r as f64,
-                Channel::Green => color_2.g as f64,
-                Channel::Blue => color_2.b as f64,
+                Channel::Red => f64::from(color_2.r),
+                Channel::Green => f64::from(color_2.g),
+                Channel::Blue => f64::from(color_2.b),
             };
             let range_mid_2 = (range_arr_2[0] + range_arr_2[1]) / 2.0;
             let distance_2 = range_mid_2 - dom_color_2;
@@ -104,7 +104,7 @@ impl MedianCut {
             entries.push(entry1);
             entries.push(entry2);
         }
-        return hashcolors;
+        hashcolors
     }
 
     fn process(pixels: Vec<Color>, colors: usize) -> Palette {
@@ -143,9 +143,7 @@ fn find_avg_color(pixels: &[Color]) -> Color {
 
 fn find_bucket_ranges(pixels: &[Color]) -> ((Channel, u8, [u8; 2]), u8) {
     // simd? I'm not skilled enough
-    if pixels.is_empty() {
-        panic!("find_bucket_ranges received an empty slice")
-    }
+    assert!(!pixels.is_empty(), "find_bucket_ranges received an empty slice");
     let [range_r, range_g, range_b] = pixels.iter().fold(
         [[u8::MAX, u8::MIN], [u8::MAX, u8::MIN], [u8::MAX, u8::MIN]],
         |mut prev, curr| {
@@ -168,7 +166,7 @@ fn find_bucket_ranges(pixels: &[Color]) -> ((Channel, u8, [u8; 2]), u8) {
     ];
     ranges.sort_by_key(|r| 255 - r.1);
     let rmax = ranges[0];
-    let sigma = (ranges[0].1 as u32 + ranges[1].1 as u32 + ranges[2].1 as u32) / 3;
+    let sigma = (u32::from(ranges[0].1) + u32::from(ranges[1].1) + u32::from(ranges[2].1)) / 3;
     (rmax, sigma as u8)
 }
 
