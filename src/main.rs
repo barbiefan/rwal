@@ -1,6 +1,5 @@
 use image::{
-    imageops::{self, FilterType::Nearest},
-    DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage,
+    imageops::FilterType::Nearest, DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage,
 };
 use rwal::{
     backends::{get_backend, Backends},
@@ -82,27 +81,23 @@ fn main() {
     let pal = into_palette(&colors);
 
     if arguments.test {
-        let mut orig = image::open(&arguments.file_path).expect("expected valid png or jpeg image");
-        let (o_width, o_heigth) = orig.dimensions();
-        let width = o_width / 10;
+        let filename = arguments.file_path.file_name().unwrap().to_string_lossy();
+        let filename = format!("{}_{}", &arguments.backend, filename);
 
         let mut pimg: RgbaImage = ImageBuffer::new(
-            1,
             u32::try_from(arguments.colors).expect("colors number bigger than u32 range"),
+            1,
         );
         for (index, pix) in pimg.pixels_mut().enumerate() {
             let pp = pal[&format!("color_{index}")];
             *pix = Rgba::from([pp.r, pp.g, pp.b, 255]);
         }
         let mut pimg: DynamicImage = pimg.into();
-        pimg = pimg.resize_exact(width, o_heigth, Nearest);
+        let (w, h) = pimg.dimensions();
+        pimg = pimg.resize_exact(w * 300, h * 300, Nearest);
 
-        imageops::overlay(&mut orig, &pimg, 0, -1);
-        orig.save(format!(
-            "/home/obey/Documents/git/rwal/test/{}",
-            arguments.file_path.file_name().unwrap().to_string_lossy()
-        ))
-        .expect("can't save image");
+        pimg.save(format!("/home/obey/Documents/git/rwal/test/{filename}",))
+            .expect("can't save image");
     } else {
         match process_templates(&pal, templates_dir, cache_dir) {
             Ok(_) => (),

@@ -35,3 +35,35 @@ I'm learning rust, so any criticism/PRs are welcome.
 **These can be chained, like** `-p brightness,bg-fg-rest`. They will be applied in specified order.
 
 `-c, --colors <COLORS>` number of colors to produce. can be in a range from 1 to 256. On high color counts some backends may break from color count in an image.
+
+## Examples:
+
+![](./res/logo_nasa_japanese.png)
+:---------------:|:--------------------------------------------:
+wal (imagemagick)| ![](./res/wal_logo_nasa_japanese.png)
+:---------------:|:--------------------------------------------:
+median-cut | ![](./res/mediancut_logo_nasa_japanese.png)
+
+![](./res/anime_city_futuristic.png)
+:---------------:|:--------------------------------------------:
+wal (imagemagick)| ![](./res/wal_anime_city_futuristic.png)
+:---------------:|:--------------------------------------------:
+median-cut | ![](./res/mediancut_anime_city_futuristic.png)
+
+![](./res/anime_dragon_man_light.jpg)
+:---------------:|:--------------------------------------------:
+wal (imagemagick)| ![](./res/wal_anime_dragon_man_light.jpg)
+:---------------:|:--------------------------------------------:
+median-cut | ![](./res/mediancut_anime_dragon_man_light.jpg)
+
+![](./res/cyber-girl-light.png)
+:---------------:|:--------------------------------------------:
+wal (imagemagick)| ![](./res/wal_cyber-girl-light.png)
+:---------------:|:--------------------------------------------:
+median-cut | ![](./res/mediancut_cyber-girl-light.png)
+
+![](./res/lake_sunset_landscape.png)
+:---------------:|:--------------------------------------------:
+wal (imagemagick)| ![](./res/wal_lake_sunset_landscape.png)
+:---------------:|:--------------------------------------------:
+median-cut | ![](./res/mediancut_lake_sunset_landscape.png)

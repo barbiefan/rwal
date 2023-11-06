@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use std::fmt::Display;
 use std::path::Path;
 
 use super::data::color::Color;
@@ -16,6 +17,16 @@ pub enum Backends {
     Simple,
     Wal,
     MedianCut,
+}
+
+impl Display for Backends {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Backends::Simple => f.write_str("simple"),
+            Backends::Wal => f.write_str("wal"),
+            Backends::MedianCut => f.write_str("mediancut"),
+        }
+    }
 }
 
 #[must_use]
