@@ -55,8 +55,8 @@ fn main() {
         let home_path = PathBuf::from(&home_env);
         templates_dir = home_path.clone();
         cache_dir = home_path.clone();
-        templates_dir.push("/.config/rwal/templates");
-        cache_dir.push("/.cache/rwal/");
+        templates_dir.push(".config/rwal/templates");
+        cache_dir.push(".cache/rwal/");
         if let Some(d) = &arguments.templates_dir {
             templates_dir = PathBuf::from(d);
         };

@@ -5,11 +5,26 @@ use super::{Backend, Color, WalBackend};
 impl Backend for WalBackend {
     fn generate_colors(&self, path: &Path, colors: usize) -> HashSet<Color> {
         let magick_command = "magick";
-        WalBackend::imagemagick(
-            16 + i32::try_from(colors).expect("colors number bigger than u32 range"),
-            path,
-            magick_command,
-        )
+        let mut raw_colors: HashSet<Color> = HashSet::default();
+
+        for i in 0..20 {
+            raw_colors = WalBackend::imagemagick(
+                i32::try_from(16 + i).expect("colors number bigger than u32 range"),
+                path,
+                magick_command,
+            );
+            if raw_colors.len() > colors {
+                break;
+            };
+            if i == 19 {
+                println!("Imagemagick couldn't generate a suitable palette.");
+            } else {
+                println!("Imagemagick couldn't generate a palette.");
+                println!("Trying a larger palette size {}", 16 + i);
+            }
+        }
+
+        return raw_colors;
     }
 }
 

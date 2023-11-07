@@ -24,7 +24,7 @@ I'm learning rust, so any criticism/PRs are welcome.
 
 `-b, --backend <BACKEND>` currently there are 3 backends available: wal (imagemagick), modified median-cut and simple.  
 `simple` is useless. It was implemented just for initial testing. May be removed later.  
-`wal` is wal. Code initially was stolen from rswal, another pywal rust port.  
+`wal` is wal without post processing (should be named magick i guess). Code initially was stolen from rswal, another pywal rust port.  
 `median-cut` is median-cut but with different logic for selecting buckets to cut (not a proven-good-algorithm, just my experiments and whiteboarding.)
 
 `-p, --patterns <PATTERNS>` these determine in which order final colors will be represented.  
